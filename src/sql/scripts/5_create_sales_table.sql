@@ -17,7 +17,7 @@ CREATE TABLE sales
     ship_date DATE NOT NULL DEFAULT CURRENT_DATE,
     units_sold INTEGER,
     unit_price NUMERIC(12,2),
-    unit_cose NUMERIC(12,2),
+    unit_cost NUMERIC(12,2),
     total_revenue NUMERIC(12,2),
     total_cost NUMERIC(12,2),
     total_profit NUMERIC(12,2)

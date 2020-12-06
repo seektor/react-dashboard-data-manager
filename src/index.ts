@@ -1,4 +1,5 @@
 import { Client } from "pg";
+import { loadData } from "./data/dataLoader";
 import { createDatabase, loadSqls } from "./sql/sqlLoader";
 import { APP_CONFIG } from "./utils/appConfig";
 
@@ -13,7 +14,7 @@ const main = async () => {
   try {
     await createDatabase();
     await loadSqls();
-    process.exit();
+    await loadData();
   } catch (e) {
     console.log(e);
     process.exit();
