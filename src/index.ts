@@ -1,4 +1,5 @@
 import { Client } from "pg";
+import { createDatabase, loadSqls } from "./sql/sqlLoader";
 import { APP_CONFIG } from "./utils/appConfig";
 
 const client = new Client({
@@ -8,9 +9,15 @@ const client = new Client({
   port: parseInt(APP_CONFIG.POSTGRES_PORT),
 });
 
-client
-  .connect()
-  .then(() =>
-    console.log(`Connected to Postgres at port ${APP_CONFIG.POSTGRES_PORT}`)
-  )
-  .catch((e) => console.log(e));
+const main = async () => {
+  try {
+    await createDatabase();
+    await loadSqls();
+    process.exit();
+  } catch (e) {
+    console.log(e);
+    process.exit();
+  }
+};
+
+main();

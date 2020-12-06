@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS regions;
+
+CREATE TABLE regions(
+    id SERIAL PRIMARY KEY NOT NULL,
+    region VARCHAR(50) NOT NULL
+);

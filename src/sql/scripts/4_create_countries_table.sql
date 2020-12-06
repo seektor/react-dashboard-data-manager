@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS countries;
+
+CREATE TABLE countries(
+    id SERIAL PRIMARY KEY NOT NULL,
+    country VARCHAR(50) NOT NULL
+);
