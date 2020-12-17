@@ -13,7 +13,6 @@ CREATE TABLE sales
     sales_channel sales_channel_type NOT NULL,
     order_priority order_priority_type NOT NULL,
     order_date DATE NOT NULL DEFAULT CURRENT_DATE,
-    order_id INTEGER,
     ship_date DATE NOT NULL DEFAULT CURRENT_DATE,
     units_sold INTEGER,
     unit_price NUMERIC(12,2),

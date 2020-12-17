@@ -93,13 +93,13 @@ const updateSalesData = async () => {
   for await (const untypedRow of readStream) {
     const row: SalesRow = untypedRow;
     const data = [
+      row["Order ID"],
       REGION_TO_ID_MAP.get(row.Region),
       COUNTRY_TO_ID_MAP.get(row.Country),
       row["Item Type"],
       row["Sales Channel"],
       row["Order Priority"],
       row["Order Date"],
-      row["Order ID"],
       row["Ship Date"],
       row["Units Sold"],
       row["Unit Price"],
@@ -109,7 +109,7 @@ const updateSalesData = async () => {
       row["Total Profit"],
     ];
     await client.query(
-      "INSERT INTO sales(region_id, country_id, item_type, sales_channel, order_priority, order_date, order_id, ship_date, units_sold, unit_price, unit_cost, total_revenue, total_cost, total_profit) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
+      "INSERT INTO sales(id, region_id, country_id, item_type, sales_channel, order_priority, order_date, ship_date, units_sold, unit_price, unit_cost, total_revenue, total_cost, total_profit) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
       data
     );
   }
