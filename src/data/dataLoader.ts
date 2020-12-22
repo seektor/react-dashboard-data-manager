@@ -1,6 +1,7 @@
 import csvParser from "csv-parser";
 import * as fs from "fs";
 import * as path from "path";
+import { Client } from "pg";
 import { createDbClient } from "../utils/dbClientCreators";
 
 const FILE_PATH = path.join(__dirname, "10000 Sales Records.csv");
@@ -79,6 +80,27 @@ const updateDictionaryTables = async () => {
   client.end();
 };
 
+const createValuesStringQuery = (buffer: string[][], toIndex: number) => {
+  return buffer
+    .slice(0, toIndex)
+    .map((row) => `(${row.map((val) => `'${val}'`).join(",")})`)
+    .join(",");
+};
+
+const updateSalesFromBuffer = async (
+  client: Client,
+  buffer: string[][],
+  toIndex: number
+) => {
+  if (toIndex === 0) {
+    return;
+  }
+  const values = createValuesStringQuery(buffer, toIndex);
+  await client.query(
+    `INSERT INTO sales(id, region_id, country_id, item_type, sales_channel, order_priority, order_date, ship_date, units_sold, unit_price, unit_cost, total_revenue, total_cost, total_profit) VALUES${values}`
+  );
+};
+
 const updateSalesData = async () => {
   const client = createDbClient();
   await client.connect();
@@ -89,10 +111,13 @@ const updateSalesData = async () => {
 
   console.log("=== UPDATING SALES DATA ===");
 
-  // Terrible implementation I guess...
+  const bufferLimit = 2000;
+  let buffer = new Array(bufferLimit);
+  let bufferIndex = 0;
+
   for await (const untypedRow of readStream) {
     const row: SalesRow = untypedRow;
-    const data = [
+    const data: string[] = [
       row["Order ID"],
       REGION_TO_ID_MAP.get(row.Region),
       COUNTRY_TO_ID_MAP.get(row.Country),
@@ -108,11 +133,17 @@ const updateSalesData = async () => {
       row["Total Cost"],
       row["Total Profit"],
     ];
-    await client.query(
-      "INSERT INTO sales(id, region_id, country_id, item_type, sales_channel, order_priority, order_date, ship_date, units_sold, unit_price, unit_cost, total_revenue, total_cost, total_profit) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
-      data
-    );
+
+    buffer[bufferIndex] = data;
+    bufferIndex++;
+
+    if (bufferIndex === bufferLimit) {
+      await updateSalesFromBuffer(client, buffer, bufferIndex);
+      buffer = new Array(bufferLimit);
+      bufferIndex = 0;
+    }
   }
+  await updateSalesFromBuffer(client, buffer, bufferIndex);
 
   console.log("=== SALES DATA UPDATED ===");
   readStream.end();
